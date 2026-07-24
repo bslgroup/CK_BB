@@ -5,10 +5,10 @@ by Samantha Gies, Nolan K. McLaughlin, Ahmed Shubbar, Chen Kong, Tianqi Wu, Sana
 
 To whom correspondence may be addressed. Email: reza.dastvan@health.slu.edu
 
-DEER_DATA_CK-BB:
+DEER_DATA_CK-BB: Raw DEER spectroscopy data in Bruker BES3T format.
 
-Deerfold_Predictions:
+Deerfold_Predictions: The top 10 DEERFold-generated models and principal component analysis (PCA) of the top 50 models for each condition.
 
-MD_Data: Molecular Dynamics Simulations Data (see the README file inside the folder)
+MD_Data: Molecular Dynamics Simulations Data (see the README file inside the folder).
 
-Refined_AF3_models:
+Refined_AF3_models: DEER-guided refinements of the AlphaFold 3-generated CK-BB model.
