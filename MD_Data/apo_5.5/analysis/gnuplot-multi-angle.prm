@@ -1,0 +1,44 @@
+set size 1, 1
+#set terminal postscript eps solid color enhanced lw 3.0 "Times-Roman" 24
+set terminal postscript eps size 4,3.2 solid color enhanced lw 3.0 "Times-Bold" 30
+
+set termoption enhanced
+set encoding iso_8859_1
+#set key right top
+
+#set key box lt -1 lw 2 
+
+set key vertical maxrows 3 #sets how many rows in key before starting a new column with max amount of rows
+
+set bmargin 4 #thickness of box around graph 
+
+
+set output "angle.ps"
+
+set multiplot #big page, multiple plots 
+set macros #gives commands for plot
+POS = "at graph 0.06,0.9 font ',32'" #gives position 
+POL = "at graph 0.6,0.92 font ',32'" 
+POA = "at graph 0.45,0.9 font ',30'"
+POG = "at graph 0.45,0.9 font ',30'"
+
+
+set xlabel "MD time (ns)" font ",30" #change x axis label and font of it  
+set ylabel "EC-angle (deg)" offset 1,0 font ",20" #
+
+set origin 0,0 #tells where on page to print the plot 
+set xtics font "Times-Roman,30" #font of x ticks and size
+set ytics font "Times-Roman,30" #see above
+set key top right
+set key width 1
+set key font "Arial,12"
+set xrange [0:1000] #range
+set yrange [60:100] #range
+set xtics 200 #go from 0 to 530 with a tick every 50 points in between 
+set ytics 20 
+set ylabel "Angle (deg)" offset 1,0 font ",30"
+
+
+plot "../1/EC-angle.txt" u ($1*0.12*20):2 w l lw 1 lc rgb "blue" t "rep1","../2/EC-angle.txt" u ($1*0.12*20):2 w l lw 1 lc rgb "black" t "rep2","../3/EC-angle.txt" u ($1*0.12*20):2 w l lw 1 lc rgb "red" t "rep3"
+
+unset multiplot

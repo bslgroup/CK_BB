@@ -1,0 +1,51 @@
+# --- Figure & terminal ---
+set size 1, 1
+# Slightly taller and balanced figure
+set terminal postscript eps size 6,10 solid color enhanced lw 3.0 "Times-Bold" 32
+set termoption enhanced
+set encoding iso_8859_1
+
+# --- Legend (key) ---
+set key top center
+set key horizontal
+set key width 1.2
+set key font "Arial,24"
+set key box lw 1
+
+# --- Margins, labels, axes ---
+set bmargin 6
+set tmargin 5
+set lmargin 10
+set rmargin 5
+set xlabel "Residue Number" font ",56"
+set ylabel "RMSF (\305)" offset 1,0 font ",56"
+set xtics font "Times-Roman,36"
+set ytics font "Times-Roman,36"
+set xrange [0:385]
+set yrange [0:10]
+set xtics 0,100,385
+set ytics 2
+
+# --- Output file ---
+set output "rmsf.ps"
+
+# --- Multiplot: 2 rows x 1 column ---
+set multiplot layout 2,1 title "RMSF by Protomer" font ",44"
+
+# =========================
+# Panel 1: Protomer A
+# =========================
+set title "Protomer A" font ",44"
+plot "../1/rmsf_a.txt" u 1:2 w l lw 2 lc rgb "blue"  t "Rep 1", \
+     "../2/rmsf_a.txt" u 1:2 w l lw 2 lc rgb "black" t "Rep 2", \
+     "../3/rmsf_a.txt" u 1:2 w l lw 2 lc rgb "red"   t "Rep 3"
+
+# =========================
+# Panel 2: Protomer B
+# =========================
+set title "Protomer B" font ",44"
+plot "../1/rmsf_b.txt" u 1:2 w l lw 2 lc rgb "blue"  t "Rep 1", \
+     "../2/rmsf_b.txt" u 1:2 w l lw 2 lc rgb "black" t "Rep 2", \
+     "../3/rmsf_b.txt" u 1:2 w l lw 2 lc rgb "red"   t "Rep 3"
+
+unset multiplot

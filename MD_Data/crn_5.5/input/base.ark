@@ -1,0 +1,57 @@
+anton.tune {
+    trajectories = [{
+        outdir = energy.etr
+        interval = 12.0
+        selection = none
+    } {
+        outdir = nowater.dtr
+        interval = 120.0
+        selection = "not water"
+    } {
+        outdir = all.dtr
+        interval = 120.0
+        selection = "all"
+    }]
+
+    last_time = 1008000.0
+}
+
+calmdown.enabled = true
+
+integrator {
+    Multigrator {
+        thermostat {
+            interval = 48
+            type = Antithetic
+        }
+
+        barostat {
+            interval = 480
+            type = MC
+        }
+    }
+
+    dt = 0.0025
+
+    pressure {
+        isotropy = isotropic
+        p_ref = 1.0
+        tension_ref = [0 0 0 0 0 0 0 0 0]
+    }
+
+    respa {
+        bonded_interval = 1
+        nonbonded_far_interval = 3
+        nonbonded_near_interval = 1
+    }
+
+    temperature = [{
+        T_ref = 310.00
+    }]
+
+    type = Multigrator
+}
+
+force.nonbonded.taper = shift
+force.nonbonded.vdw_r_cut = 12
+force.nonbonded.tail_r_cut = 12

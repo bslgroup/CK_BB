@@ -1,0 +1,39 @@
+set term postscript color
+set size 1, 1
+set terminal postscript eps size 4,3.2 solid color enhanced lw 3.0 "Times-Bold" 30
+
+set termoption enhanced
+set encoding iso_8859_1
+
+
+set key vertical maxrows 3 #sets how many rows in key before starting a new column with max amount of rows
+
+set bmargin 4 #thickness of box around graph 
+
+
+set output "rmsd.ps" #set output name -will need one for 7n6u and one for 7n6w
+set multiplot #big page, multiple plots 
+set macros #gives commands for plot
+POS = "at graph 0.06,0.9 font ',32'" #gives position 
+
+
+set xlabel "Time (ns)" font ",50" #change x axis label and font of it  
+set ylabel "RMSD (\305)" offset 1,0 font ",30" #see above \305 is angstrom symbol
+
+set origin 0,2 #tells where on page to print the plot 
+set xtics font "Times-Roman,30" #font of x ticks and size
+set ytics font "Times-Roman,30" #see above
+set key top right
+set key width 1
+set title "Apo 5.5"
+set key font "Arial,25"
+set xrange [0:1000] #range
+set yrange [0:10] #range
+set xtics 200 #go from 0 to 800 with 200 ticks in between 
+set xlabel "Time (ns)" font ",30"
+set ytics 2
+set ylabel "RMSD (\305)" offset 1,0 font ",30"
+plot "../1/rmsd.txt" u ($1*0.12*20):3 w l lw 1.5 lc rgb "blue" t "rep1","../2/rmsd.txt" u ($1*0.12*20):3 w l lw 1.5 lc rgb "black" t "rep2","../3/rmsd.txt" u ($1*0.12*20):3 w l lw 1.5 lc rgb "red" t "rep3"
+
+
+unset multiplot

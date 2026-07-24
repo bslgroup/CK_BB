@@ -1,0 +1,191 @@
+#!/bin/csh
+
+if ( $HOST !~ *frontera* ) then
+  echo "This script must be run on the Frontera head nodes."
+  exit -1
+endif
+
+set CORESPERHOST = 56
+
+if ( $# < 3 ) then
+  echo "This script requires three arguments:"
+  echo "  NAMD input file"
+  echo "  NAMD log file"
+  echo "  number of nodes (number of cores / $CORESPERHOST)"
+  echo "  processes per node (defaults to 4, other options are 6, 2, and 1)"
+  #echo '  use hyperthreads (defaults to "noht", other option is "ht")'
+  echo '  queue (defaults to "normal", other options are "test" and "short")'
+  echo '  --account=XXXXX (optional)'
+  echo "  replica or other args (optional)"
+  exit -1
+endif
+
+set CONFFILE = $1
+shift
+set LOGFILE = $1
+shift
+set NUMHOSTS = $1
+shift
+
+set RANKSPERHOST = 8
+
+if ( $# && $1 !~ *[a-z]* ) then
+  set RANKSPERHOST = $1
+  shift
+endif
+
+#set THREADSPERCORE = 1
+
+#if ( $# ) then
+#  switch ( $1 )
+#  case "ht":
+#    set THREADSPERCORE = 2
+#    shift
+#    breaksw
+#  case "noht":
+ #   set THREADSPERCORE = 1
+ #   shift
+ #   breaksw
+ # endsw
+#endif
+
+set QUEUE = normal
+if ( $NUMHOSTS > 512 ) set QUEUE = large
+set TIME = 12:00:00
+
+if ( $# ) then
+  if ( $1 == normal ) then
+    shift
+  else if ( $1 == test ) then
+    set TIME = 00:30:00
+    set QUEUE = normal
+    if ( $NUMHOSTS < 41 ) set QUEUE = development
+    if ( $NUMHOSTS > 512 ) set QUEUE = large
+    shift
+  else if ( $1 == short ) then
+    set TIME = 00:30:00
+    set QUEUE = normal
+    if ( $NUMHOSTS > 512 ) set QUEUE = large
+    shift
+  endif
+endif
+
+if ( $# && $1 =~ --account=* ) then
+  set QUEUE = "$QUEUE $1"
+  shift
+endif
+
+set REPLICAS = 1
+set REPARGS = ""
+
+while ( $# )
+  if ( "$1" == "+replicas" || "$1" == "+partitions" ) then
+    set REPLICAS = $2
+  endif
+  set REPARGS = "$REPARGS $1"
+  shift
+end
+
+if ( $REPLICAS == $NUMHOSTS ) then
+  set RANKSPERHOST = 1
+endif
+if ( $REPLICAS == $NUMHOSTS * 4 ) then
+  set RANKSPERHOST = 4
+endif
+if ( $REPLICAS == $NUMHOSTS * 6 ) then
+  set RANKSPERHOST = 6
+endif
+
+@ TOTALRANKS = $NUMHOSTS * $RANKSPERHOST
+
+if ( $TOTALRANKS % $REPLICAS ) then
+  echo "replicas must evenly divide total processes"
+  exit -1
+endif
+
+if ( ! -f $CONFFILE ) then
+  echo "NAMD input file $CONFFILE does not exist!"
+  exit -1
+endif
+
+if ( -f $LOGFILE ) then
+  echo "NAMD input file $LOGFILE already exists!"
+  exit -1
+endif
+
+#switch ( $RANKSPERHOST.$THREADSPERCORE )
+#case 6.1:
+#    set NAMDARGS = "+ppn 8 +pemap 6-53:2,7-53:2 +commap 0,2,4,1,3,5"
+#  breaksw
+#case 6.2:
+#    #set NAMDARGS = "+ppn 14 +pemap 1-47:8.7+48 +commap 0-47:8"
+#    set NAMDARGS = "+ppn 14 +pemap 2-14:2+48,18-30:2+48,34-46:2+48,3-15:2+48,19-31:2+48,35-47:2+48 +commap 0,16,32,1,17,33"
+#  breaksw
+#case 4.1:
+#    set NAMDARGS = "+ppn 13 +pemap 4-55:2,5-55:2 +commap 0,2,1,3"
+#  breaksw
+#case 4.2:
+#    #set NAMDARGS = "+ppn 22 +pemap 1-47:12.11+48 +commap 0-47:12"
+#    set NAMDARGS = "+ppn 22 +pemap 2-22:2+48,26-46:2+48,3-23:2+48,27-47:2+48 +commap 0,24,1,25"
+#  breaksw
+#case 2.1:
+#    set NAMDARGS = "+ppn 27 +pemap 2-55:2,3-55:2 +commap 0,1"
+#  breaksw
+#case 2.2:
+#    #set NAMDARGS = "+ppn 46 +pemap 1-47:24.23+48 +commap 0-47:24"
+#    set NAMDARGS = "+ppn 46 +pemap 2-47:2+48,3-47:2+48 +commap 0,1"
+#  breaksw
+#case 1.1:
+#    set NAMDARGS = "+ppn 55 +pemap 2-55:2,1-55:2 +commap 0"
+#  breaksw
+#case 1.2:
+#    set NAMDARGS = "+ppn 94 +pemap 2-47:2+48,1-47:2+48 +commap 0"
+#  breaksw
+#default:
+#    echo "Unrecognized combination of $RANKSPERHOST ranks per host with $THREADSPERCORE threads per core"
+#    exit -1
+#endsw
+
+set RUNDIR = `pwd`
+
+#set BINDIR = /work2/09106/ssauve/frontera
+#set SCRIPTDIR = /home1/00288/tg455591/NAMD_scripts
+
+echo "Submitting NAMD run to queue $QUEUE for $TIME..."
+echo ""
+#echo ibrun $BINDIR/namd2 $NAMDARGS $CONFFILE $REPARGS
+#echo ""
+# cat << ENDINPUT
+
+echo sbatch --job-name=namd-job --nodes=$NUMHOSTS --ntasks=$TOTALRANKS --time=$TIME --partition=$QUEUE
+sbatch --job-name=namd-job --nodes=$NUMHOSTS --ntasks=$TOTALRANKS --time=$TIME --partition=$QUEUE << ENDINPUT
+#!/bin/bash
+
+cd $RUNDIR
+
+module load namd/2.14
+
+echo ibrun namd2 +ppn 6 +pemap 2-12:2,16-26:2,30-40:2,44-54:2,3-13:2,17-27:2,31-41:2,45-55:2 +commap 0,14,28,42,1,15,29,43 $CONFFILE $REPARGS
+
+ibrun namd2 +ppn 6 +pemap 2-12:2,16-26:2,30-40:2,44-54:2,3-13:2,17-27:2,31-41:2,45-55:2 +commap 0,14,28,42,1,15,29,43 $CONFFILE $REPARGS >& $LOGFILE
+
+ENDINPUT
+
+if ( $status ) then
+echo ""
+echo "Queue submission failed, please see errors above."
+echo ""
+else
+echo ""
+echo "NAMD is submitted to the queue, to check on your job use this command:"
+echo ""
+echo "    squeue -u $USER"
+echo ""
+echo "Your job is running if there is an R (running) in the S (state) column."
+echo "You may monitor progress with this command:"
+echo ""
+echo "    tail -F $LOGFILE"
+echo ""
+echo "You will need to press Control-C to exit the tail command."
+echo ""
+endif
