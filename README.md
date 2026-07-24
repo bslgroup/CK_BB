@@ -6,6 +6,9 @@ by Samantha Gies, Nolan K. McLaughlin, Ahmed Shubbar, Chen Kong, Tianqi Wu, Sana
 To whom correspondence may be addressed. Email: reza.dastvan@health.slu.edu
 
 DEER_DATA_CK-BB:
+
 Deerfold_Predictions:
+
 MD_Data: Molecular Dynamics Simulations Data (see the README file inside the folder)
+
 Refined_AF3_models:
